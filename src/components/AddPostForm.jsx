@@ -1,89 +1,69 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { rehydratePosts } from '../redux/postSlice';
 
-export default function PostForm() {
+export default function AddPostPage() {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [comments, setComments] = useState('');
-  const router = useRouter();
-  const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Retrieve existing posts from localStorage
-    const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
-
-    // Create a new post object
     const newPost = {
-      id: storedPosts.length + 1,
+      id: Date.now(), // Create a unique ID based on timestamp
       title,
       body,
       likes: 0,
-      comments: comments
-        ? comments.split('\n').map((comment) => ({ user: 'User', text: comment }))
-        : [],
+      comments: [],
     };
 
-    // Update localStorage
+    // Get current posts from localStorage or Redux
+    const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
     const updatedPosts = [...storedPosts, newPost];
     localStorage.setItem('posts', JSON.stringify(updatedPosts));
 
-    // Dispatch rehydration to update Redux store
+    // Rehydrate Redux state with the updated posts
     dispatch(rehydratePosts(updatedPosts));
 
-    // Redirect to the main page
-    router.push('/');
+    setTitle('');
+    setBody('');
+
+    Router.push('/');
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Create a New Post</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="title">
-            Title
-          </label>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Create New Post</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="title" className="block text-lg font-semibold">Title</label>
           <input
             type="text"
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-2 border rounded-lg"
             required
-            className="w-full p-2 border rounded"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="body">
-            Body
-          </label>
+
+        <div className="mb-4">
+          <label htmlFor="body" className="block text-lg font-semibold">Body</label>
           <textarea
             id="body"
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            required
+            className="w-full p-2 border rounded-lg"
             rows="4"
-            className="w-full p-2 border rounded"
-          ></textarea>
+            required
+          />
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="comments">
-            Comments (Optional)
-          </label>
-          <textarea
-            id="comments"
-            value={comments}
-            onChange={(e) => setComments(e.target.value)}
-            rows="3"
-            className="w-full p-2 border rounded"
-          ></textarea>
-        </div>
-        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded">
-          Submit
+
+        <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+          Add Post
         </button>
       </form>
     </div>
