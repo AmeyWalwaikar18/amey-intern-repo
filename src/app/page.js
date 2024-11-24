@@ -11,6 +11,28 @@ export default function MainPage() {
   const router = useRouter();
   const posts = useSelector((state) => state.posts.posts);
   const [expandedComments, setExpandedComments] = useState({});
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Effect to handle dark mode based on localStorage
+  useEffect(() => {
+    const savedMode = localStorage.getItem('darkMode') === 'true';
+    setIsDarkMode(savedMode);
+    if (savedMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  // Effect to save dark mode preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('darkMode', isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     const storedPosts = JSON.parse(localStorage.getItem('posts')) || [];
@@ -47,15 +69,28 @@ export default function MainPage() {
         >
           Create Post
         </button>
+        
+        {/* Dark Mode Toggle Button */}
+        <button
+          onClick={() => setIsDarkMode((prevMode) => !prevMode)}
+          className="ml-4 px-4 py-2 bg-gray-500 text-white rounded-lg shadow"
+        >
+          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+        </button>
       </div>
 
       {posts.length === 0 ? (
         <p>No posts available.</p>
       ) : (
         posts.map((post) => (
-          <div key={post.id} className="bg-white p-4 rounded-lg shadow-md mb-4">
-            <h2 className="text-2xl font-semibold">{post.title}</h2>
-            <p>{post.body}</p>
+          <div
+            key={post.id}
+            className="bg-white p-4 rounded-lg shadow-md mb-4 dark:bg-gray-800"
+          >
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {post.title}
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300">{post.body}</p>
 
             <button
               onClick={() => handleLike(post.id)}
@@ -66,17 +101,17 @@ export default function MainPage() {
             </button>
 
             <div className="mt-4">
-              <h3 className="text-lg font-medium">Comments</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Comments</h3>
               {(!post.comments || post.comments.length === 0) ? (
-                <p>No comments yet.</p>
+                <p className="text-gray-700 dark:text-gray-300">No comments yet.</p>
               ) : expandedComments[post.id] ? (
                 post.comments.map((comment, idx) => (
-                  <p key={idx}>
+                  <p key={idx} className="text-gray-700 dark:text-gray-300">
                     <strong>{comment.user}:</strong> {comment.text}
                   </p>
                 ))
               ) : (
-                <p>
+                <p className="text-gray-700 dark:text-gray-300">
                   <strong>{post.comments[0].user}:</strong> {post.comments[0].text}
                 </p>
               )}

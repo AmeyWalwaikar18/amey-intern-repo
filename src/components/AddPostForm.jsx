@@ -3,9 +3,11 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { rehydratePosts } from '../redux/postSlice';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 export default function AddPostPage() {
   const dispatch = useDispatch();
+  const router = useRouter(); // Initialize router
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
 
@@ -31,7 +33,8 @@ export default function AddPostPage() {
     setTitle('');
     setBody('');
 
-    Router.push('/');
+    // Navigate back to the main page after adding the post
+    router.push('/'); // Use router.push to navigate back to the homepage
   };
 
   return (
