@@ -1,21 +1,35 @@
+/* globals.css */
+
+/* Import Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Variables for Dark Mode */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-color-light: #ffffff;
+  --text-color-light: #000000;
+  --bg-color-dark: #121212;
+  --text-color-dark: #ffffff;
 }
 
+/* Apply default light mode styles */
+body {
+  background-color: var(--bg-color-light);
+  color: var(--text-color-light);
+  font-family: sans-serif;
+}
+
+/* Dark Mode Styles */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg-color-light: #121212;
+    --text-color-light: #ffffff;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* Tailwind dark mode class */
+.dark {
+  background-color: var(--bg-color-dark);
+  color: var(--text-color-dark);
 }

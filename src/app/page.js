@@ -1,101 +1,192 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import Link from 'next/link';
+import { SlLike } from 'react-icons/sl';
+
+export default function MainPage() {
+  const [posts, setPosts] = useState([]);
+  const reduxPosts = useSelector((state) => state.posts.posts);
+  const [newComments, setNewComments] = useState({});
+  const [showMore, setShowMore] = useState({}); // Track the show more state for each post
+
+  useEffect(() => {
+    const storedPosts = JSON.parse(localStorage.getItem('mockPosts')) || [];
+    setPosts(storedPosts);
+  }, [reduxPosts]);
+
+  // Dark mode toggle handler
+  const handleDarkModeToggle = () => {
+    // Toggle the 'dark' class on the <html> element
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  };
+
+  // Check and apply the user's theme preference from localStorage
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const handleLike = (postId) => {
+    const updatedPosts = posts.map((post) =>
+      post.id === postId ? { ...post, likes: post.likes + 1 } : post
+    );
+    setPosts(updatedPosts);
+    localStorage.setItem('mockPosts', JSON.stringify(updatedPosts));
+  };
+
+  const handleAddComment = (postId) => {
+    const commentText = newComments[postId];
+    if (!commentText) return;
+
+    const updatedPosts = posts.map((post) =>
+      post.id === postId
+        ? {
+            ...post,
+            comments: [...(post.comments || []), { user: 'User', text: commentText }],
+          }
+        : post
+    );
+
+    setPosts(updatedPosts);
+    localStorage.setItem('mockPosts', JSON.stringify(updatedPosts));
+    setNewComments((prev) => ({ ...prev, [postId]: '' }));
+  };
+
+  const handleCommentInputChange = (postId, value) => {
+    setNewComments((prev) => ({ ...prev, [postId]: value }));
+  };
+
+  const handleShowMore = (postId) => {
+    setShowMore((prev) => ({ ...prev, [postId]: !prev[postId] }));
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="main-page max-w-4xl mx-auto p-4 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-md">
+      <h1 className="text-3xl font-bold text-yellow-500 mb-6 text-center sm:text-3xl md:text-4xl lg:text-4xl dark:text-white">
+        Welcome to the Post Management App
+      </h1>
+      <p className="text-center text-blue-400 text-[20px] font-semibold dark:text-gray-300">Below is the list of all posts:</p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {/* Dark Mode Toggle Button */}
+      <button
+        onClick={handleDarkModeToggle}
+        className="absolute top-4 right-4 p-2 bg-gray-800 text-white rounded-full dark:bg-gray-200 dark:text-black"
+      >
+        Toggle Dark Mode
+      </button>
+
+      {posts.length === 0 ? (
+        <p className="text-center text-xl sm:text-base dark:text-gray-300">No posts available.</p>
+      ) : (
+        <ul>
+          {posts.map((post) => (
+            <li
+              key={post.id}
+              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 mb-6"
+            >
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">{post.title}</h2>
+              <p className="text-gray-700 dark:text-gray-300 text-[16px] mb-4">{post.body}</p>
+              <div className="flex items-center space-x-4 mb-4">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:w-fit sm:w-fit md:w-fit"
+                >
+                  <SlLike />
+                </button>
+                <strong className="text-lg sm:text-base dark:text-gray-100">Likes: {post.likes}</strong>
+              </div>
+
+              <h3 className="text-xl font-medium text-gray-800 dark:text-white mb-2">Comments:</h3>
+              <ul className="space-y-2 mb-4">
+                {(post.comments || []).length === 0 ? (
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No comments yet. Be the first to comment!</p>
+                ) : (
+                  <>
+                    {/* Show only the first comment initially */}
+                    {post.comments.slice(0, 1).map((comment, index) => (
+                      <li key={index} className="text-md text-gray-600 dark:text-gray-300">
+                        <strong>{comment.user}:</strong> {comment.text}
+                      </li>
+                    ))}
+
+                    {/* "Show More" and "Show Less" functionality */}
+                    {post.comments.length > 1 && !showMore[post.id] && (
+                      <button
+                        onClick={() => handleShowMore(post.id)}
+                        className="text-sm text-blue-500 hover:underline dark:text-blue-400"
+                      >
+                        Show More
+                      </button>
+                    )}
+                    {showMore[post.id] && (
+                      <>
+                        {post.comments.slice(1).map((comment, index) => (
+                          <li key={index + 1} className="text-sm text-gray-600 dark:text-gray-300">
+                            <strong>{comment.user}:</strong> {comment.text}
+                          </li>
+                        ))}
+                        <button
+                          onClick={() => handleShowMore(post.id)}
+                          className="text-sm text-blue-500 hover:underline dark:text-blue-400"
+                        >
+                          Show Less
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+              </ul>
+
+              <div>
+                <div className="flex flex-col space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Add a comment"
+                    value={newComments[post.id] || ''}
+                    onChange={(e) => handleCommentInputChange(post.id, e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-full"
+                  />
+                  <button
+                    onClick={() => handleAddComment(post.id)}
+                    className="self-start px-6 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 w-auto"
+                  >
+                    Submit
+                  </button>
+                </div>
+
+                <div className="mt-4">
+                  <Link href={`/api/posts/${post.id}`}>
+                    <button className="px-6 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 sm:w-full md:w-auto">
+                      View Post
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-6 text-center">
+        <Link href="/api/posts/add">
+          <button className="px-8 py-3 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 sm:w-full md:w-auto">
+            Add New Post
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }
