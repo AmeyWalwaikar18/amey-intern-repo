@@ -1,21 +1,27 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  posts: localStorage.getItem("posts") ? JSON.parse(localStorage.getItem("posts")) : [],  // Store posts in an array
-  loading: false,
-  error: null,
+  posts: [],
 };
 
 const postsSlice = createSlice({
   name: 'posts',
   initialState,
   reducers: {
-    // Action to add a new post
-    addPost: (state, action) => {
-      state.posts.push(action.payload);  // Add the new post to the posts array
+    rehydratePosts: (state, action) => {
+      state.posts = action.payload;
+    },
+    incrementLike: (state, action) => {
+      const post = state.posts.find((p) => p.id === action.payload);
+      if (post) post.likes += 1;
+    },
+    addComment: (state, action) => {
+      const { postId, comment } = action.payload;
+      const post = state.posts.find((p) => p.id === postId);
+      if (post) post.comments.push(comment);
     },
   },
 });
 
-export const { addPost } = postsSlice.actions;  // Export the addPost action
-export default postsSlice.reducer;  // Export the reducer
+export const { rehydratePosts, incrementLike, addComment } = postsSlice.actions;
+export default postsSlice.reducer;
